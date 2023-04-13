@@ -1,23 +1,21 @@
-# controls/http_python.rb
-project_id = input("http_python_project_id")
-function_name = input("http_python_function_name")
-service_account_email = input("http_python_service_account_email")
-region = input("http_python_region")
-runtime = input("http_python_runtime")
-entry_point = input("http_python_entry_point")
+# copyright: 2018, The Authors
 
-control "http_python" do
-  title "Check HTTP-triggered Python Cloud Function"
+title "Sample Section"
 
-  describe google_cloudfunctions_cloud_function(project: project_id, region: region, name: function_name) do
+http_python_project_id = input("http_python_project_id")
+http_python_region     = input("http_python_region")
+http_python_function_name = input("http_python_function_name")
+http_python_description     = input("http_python_description")
+http_python_url             = "https://"+http_python_region+"-"+http_python_project_id+".cloudfunctions.net/"+http_python_function_name
+
+control "hub-vpn-tunnel2" do
+  impact 1.0
+  describe google_cloudfunctions_cloud_function(project: http_python_project_id, location: http_python_region, name: http_python_function_name) do
     it { should exist }
-    its("name") { should(eq(function_name)) }
-    its("runtime") { should(eq|(runtime))}
-    its("entry_point") { should(eq(entry_point)) }
-    its("status") { should(eq("ACTIVE"))}
-    # its("https_trigger") { should_not be_nil }
-    its("service_account_email") { should(eq(http_python_service_account_email)) }
+    its('description') { should(eq(http_python_description)) }
+    its('available_memory_mb') { should eq 256 }
+    its('https_trigger.url') { should match(http_python_url) }
+    its('entry_point') { should eq 'hello_world' }
+    its('environment_variables') { should include('VAR1' => 'value1') }
   end
 end
-
-
