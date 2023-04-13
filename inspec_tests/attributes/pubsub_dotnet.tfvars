@@ -1,0 +1,6 @@
+local_repo_path = "<path_to_local_dotnet_repo>"
+runtime = "dotnet3"
+entry_point = "MyNamespace.MyFunction.Function"
+trigger_type = "pubsub"
+pubsub_topic_name = "my-topic"
+trigger_event_resource = "projects/my-project/topics/my-topic"

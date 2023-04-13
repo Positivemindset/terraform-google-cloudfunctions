@@ -1,0 +1,15 @@
+name: terraform_cloud_function_test
+title: Terraform Google Cloud Function Test Profile
+maintainer: Your Name
+copyright: Your Company
+copyright_email: your.email@example.com
+license: Apache-2.0
+summary: An InSpec Compliance Profile for testing Google Cloud Functions created by Terraform
+version: 1.0.0
+inspec_version: ">= 4.0"
+depends:
+  - name: inspec-gcp
+    url: https://github.com/inspec/inspec-gcp/archive/refs/tags/v1.11.0.tar.gz
+supports:
+  - platform: gcp
+  

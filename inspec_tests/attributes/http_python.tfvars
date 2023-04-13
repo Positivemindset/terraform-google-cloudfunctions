@@ -1,0 +1,5 @@
+local_repo_path = "<path_to_local_python_repo>"
+runtime = "python39"
+entry_point = "hello_world"
+trigger_type = "http"
+trigger_event_resource = "trigger_http"

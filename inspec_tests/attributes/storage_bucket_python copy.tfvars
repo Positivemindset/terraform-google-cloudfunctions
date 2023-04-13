@@ -1,0 +1,5 @@
+local_repo_path = "<path_to_local_dotnet_repo>"
+runtime = "dotnet3"
+entry_point = "MyNamespace.MyFunction.Function"
+trigger_type = "bucket"
+trigger_event_resource = "projects/_/buckets/my-bucket"
