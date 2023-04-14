@@ -1,5 +1,0 @@
-local_repo_path = "<path_to_local_python_repo>"
-runtime = "python39"
-entry_point = "hello_world"
-trigger_type = "bucket"
-trigger_event_resource = "projects/_/buckets/my-bucket"
