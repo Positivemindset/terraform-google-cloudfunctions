@@ -1,0 +1,9 @@
+# Below is to be uncommented and set with your GCP project ID:
+
+http_python_project_id: 'hostproject-379219'
+http_python_function_name: 'cf-http-python-test'
+http_python_description: 'cf-http-python-test http cloud function'
+http_python_service_account_email: 'hostproject-379219@appspot.gserviceaccount.com'
+http_python_region: 'europe-west2'
+http_python_runtime: 'python39'
+http_python_entry_point: 'hello_world'

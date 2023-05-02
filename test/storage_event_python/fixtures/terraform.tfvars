@@ -1,0 +1,23 @@
+github_url                    = "https://github.com/Positivemindset/ci-cd.git"
+folder_name                   = "ci-cd"
+zip_name                      = "hello_world_python_storageevent"
+function_name                 = "hello_world_python_storageevent"
+runtime                       = "python39"
+available_memory_mb           = 256
+timeout                       = 60
+function_archive_bucket_name  = "cf-archive-bucket"
+entry_point                   = "hello_world"
+environment_vars              = { "EXAMPLE_VAR" = "example_value" }
+ingress_settings              = "ALLOW_ALL"
+vpc_connector_egress_settings = "ALL_TRAFFIC"
+vpc_connector                 = "projects/hostproject-379219/locations/europe-west2/connectors/serverlessvpcconnector"
+service_account_email         = "hostproject-379219@appspot.gserviceaccount.com"
+max_instances                 = 10
+created_by                    = "serverless team"
+description                   = "http python based cloud function"
+owner                         = "serverless team"
+image_repository              = "cfartifactregistry"
+image_repository_type         = "CUSTOMER_MANAGED_ARTIFACT"
+trigger_type                  = "BUCKET_TRIGGER"
+project_id                    = "hostproject-379219"
+trigger_event_resource        = "cfeventbucket"

@@ -4,8 +4,8 @@ Hence instead of anticipation, given label related inputs need to be converted t
 */
 locals {
   labels = {
-    created_by   = lower(var.created_by)
-    description  = lower(var.description)
-    owner        = lower(var.owner)
+    created_by  = lower(var.created_by)
+    description = lower(var.description)
+    owner       = lower(var.owner)
   }
 }

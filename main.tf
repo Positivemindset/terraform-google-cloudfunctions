@@ -1,37 +1,35 @@
-
+# Define local variables
 locals {
-  # Get the repository name from the URL
-  repository_name = substr(var.github_url, 20, -4)
-
-  # Shared labels for all resources
+  repository_name = replace(var.github_url, "/\\.git$/", "")
   shared_labels = {
-    "created_by"  = var.created_by
-    "description" = var.description
-    "owner"       = var.owner
+    "created_by"  = replace(var.created_by, " ", "_")
+    "description" = replace(var.description, " ", "_")
+    "owner"       = replace(var.owner, " ", "_")
   }
+
 }
 
 
 
+# Clone the repository
 resource "null_resource" "clone_repository" {
   provisioner "local-exec" {
     command = <<-EOT
-      bash -c '
       if [ -d ${var.folder_name} ]; then
         rm -rf ${var.folder_name}
       fi
-      git clone ${var.github_url} ${var.folder_name}'
+      git clone ${var.github_url} ${var.folder_name}
     EOT
   }
 }
 
+# Install packages for the chosen runtime
 resource "null_resource" "install_packages" {
   depends_on = [
     null_resource.clone_repository,
   ]
   provisioner "local-exec" {
     command     = <<-EOT
-      bash -c '
       ls
       if [ "${var.runtime}" == "python39" ]; then
         if [ -f requirements.txt ]; then
@@ -41,17 +39,15 @@ resource "null_resource" "install_packages" {
         fi
       elif [ "${var.runtime}" == "dotnet3" ]; then
         dotnet restore
-      fi'
+      fi
     EOT
     working_dir = var.folder_name
   }
 }
 
-
-
+# Archive the repository
 data "archive_file" "repository_archive" {
-  count = var.trigger_type == var.trigger_type_http || var.trigger_type == var.trigger_type_pubsub ? 1 : 0
-
+  count = var.trigger_type == var.trigger_type_http || var.trigger_type == var.trigger_type_pubsub || var.trigger_type == var.trigger_type_bucket ? 1 : 0
   depends_on = [
     null_resource.install_packages
   ]
@@ -60,63 +56,25 @@ data "archive_file" "repository_archive" {
   output_path = "${var.zip_name}.zip"
 }
 
-
-# Upload the archive to a Google Cloud Storage bucket
+# Upload the archive to Google Cloud Storage
 resource "google_storage_bucket_object" "archive" {
-  count = var.trigger_type == var.trigger_type_http || var.trigger_type == var.trigger_type_pubsub ? 1 : 0
-
+  count  = var.trigger_type == var.trigger_type_http || var.trigger_type == var.trigger_type_pubsub || var.trigger_type == var.trigger_type_bucket ? 1 : 0
   name   = "${var.zip_name}.zip"
   bucket = var.function_archive_bucket_name
   source = data.archive_file.repository_archive[count.index].output_path
 }
 
 
-
-# Create HTTP-triggered Cloud Function
-resource "google_cloudfunctions_function" "http_function" {
-  count = var.trigger_type == var.trigger_type_http ? 1 : 0
-
+# Create the Google Cloud Function
+resource "google_cloudfunctions_function" "cloud_function" {
   name        = var.function_name
-  description = "${var.function_name} http cloud function"
-
-  runtime               = var.runtime
-  available_memory_mb   = var.available_memory_mb
-  timeout               = var.timeout
-  source_archive_bucket = var.function_archive_bucket_name
-  source_archive_object = google_storage_bucket_object.archive[count.index].name
-
-  trigger_http          = true
-  entry_point           = var.entry_point
-  environment_variables = var.environment_vars
-  ingress_settings      = var.ingress_settings
-  service_account_email = var.service_account_email == null ? "" : var.service_account_email
-
-  vpc_connector_egress_settings = var.vpc_connector_egress_settings
-  vpc_connector                 = var.vpc_connector
-  lifecycle {
-    create_before_destroy = true
-  }
-}
-
-# Create event-triggered Cloud Function
-resource "google_cloudfunctions_function" "event_function" {
-  count = var.trigger_type == var.trigger_type_pubsub || var.trigger_type == var.trigger_type_bucket ? 1 : 0
-
-  name        = var.function_name
-  description = "${var.function_name} events cloud function"
+  description = "${var.function_name} cloud function"
   runtime     = var.runtime
 
   available_memory_mb   = var.available_memory_mb
   timeout               = var.timeout
   source_archive_bucket = var.function_archive_bucket_name
-  source_archive_object = google_storage_bucket_object.archive[count.index].name
-
-  max_instances = var.max_instances
-
-  event_trigger {
-    event_type = var.trigger_type == var.trigger_type_pubsub ? var.trigger_event_type_pubsub : var.trigger_event_type_bucket
-    resource   = var.trigger_type == var.trigger_type_pubsub ? var.pubsub_topic_name : var.trigger_event_resource
-  }
+  source_archive_object = google_storage_bucket_object.archive[0].name
 
   entry_point                   = var.entry_point
   environment_variables         = var.environment_vars
@@ -124,13 +82,43 @@ resource "google_cloudfunctions_function" "event_function" {
   service_account_email         = var.service_account_email == null ? "" : var.service_account_email
   vpc_connector_egress_settings = var.vpc_connector_egress_settings
   vpc_connector                 = var.vpc_connector
-  labels                        = merge(local.shared_labels)
+  max_instances                 = var.max_instances
+
+
   lifecycle {
     create_before_destroy = true
   }
+
+
+  # Define the event trigger if necessary
+  dynamic "event_trigger" {
+    for_each = var.trigger_type == var.trigger_type_pubsub || var.trigger_type == var.trigger_type_bucket ? [1] : []
+    content {
+      event_type = var.trigger_type == var.trigger_type_pubsub ? var.trigger_event_type_pubsub : var.trigger_event_type_bucket
+      resource   = var.trigger_event_resource
+
+      failure_policy {
+        retry = true
+      }
+    }
+  }
+  trigger_http = var.trigger_type == var.trigger_type_pubsub || var.trigger_type == var.trigger_type_bucket ? null : true
+
+
+  build_environment_variables = var.build_env_vars
+  build_worker_pool           = var.build_worker_pool
+
+
+  kms_key_name = var.encryption_type == "CUSTOMER_MANAGED_KEY" ? var.kms_key_name : null
+  # Configure the source repository if necessary
+  /*   dynamic "source_repository" {
+    for_each = var.image_repository_type == "CUSTOMER_MANAGED_ARTIFACT" ? [1] : []
+    content {
+      url = var.image_repository
+    }
+  } */
+
+
+  labels = local.shared_labels
+
 }
-
-
-
-
-

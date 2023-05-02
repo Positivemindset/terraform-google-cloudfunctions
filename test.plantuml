@@ -1,0 +1,47 @@
+@startuml
+actor User
+boundary "GIT Webhooks" as GITWebhooks
+participant Jenkins
+participant "Jenkins Service\nAccount" as JSA
+participant "Cloud Functions\nService Account" as CFSA
+
+User -> GITWebhooks : Trigger Webhook
+GITWebhooks -> Jenkins : Notify Jenkins
+
+Jenkins -> JSA : Authenticate
+
+note right of JSA
+  (1) GitHub repository read access
+end note
+JSA ->clone_repository: Clone Repo
+
+note right of JSA
+  (2) Nexus Artifact Reader
+end note
+JSA ->install_packages_from_nexus: Install packages from Nexus
+
+JSA ->create_zip: Create zip file
+
+note right of JSA
+  (3) Storage Object Creator
+end note
+JSA ->google_storage_bucket_object_archive: Create bucket_object
+
+note right of JSA
+  (4) Cloud Functions Developer
+end note
+JSA ->google_cloudfunctions_function_cloud_function: Create cloud function
+
+note right of CFSA
+  Roles required for Cloud Function execution:\n
+  (3) Storage Object getObject\n
+  (5) Artifact Registry Writer\n
+  (6) Secret Manager Secret Accessor\n
+  (7) Cloud KMS CryptoKey Encrypter/Decrypter\n
+  (8) Compute Network User\n
+  (9) Serverless VPC Access User\n
+  (10) (Optional) Compute Network Admin
+end note
+
+CFSA -> Execute_cloud_functions : Execute Cloud Function
+@enduml

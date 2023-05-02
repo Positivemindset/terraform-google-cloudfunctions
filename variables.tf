@@ -1,143 +1,208 @@
-variable "created_by" {
-  type        = string
-  description = "Person who created the terraform resources"
-}
-
-variable "description" {
-  type        = string
-  description = "Short description on the resources created and their usage"
-}
-
-variable "owner" {
-  type        = string
-  description = "Person who manages the resources"
-}
-
-variable "github_url" {
-  type        = string
-  description = "The URL of the GitHub repository to clone"
-}
-
-
+# Cloud Function basic configuration
 variable "function_name" {
+  description = "Name of the Cloud Function"
   type        = string
-  description = "The cloud function name"
-}
-
-variable "trigger_type" {
-  type        = string
-  default     = "http"
-  description = "The type of trigger for the Cloud Function"
-}
-
-variable "trigger_type_pubsub" {
-  type        = string
-  default     = "pubsub"
-  description = "The Pub/Sub trigger type for the Cloud Function"
-}
-
-variable "trigger_type_bucket" {
-  type        = string
-  default     = "bucket"
-  description = "The Cloud Storage trigger type for the Cloud Function"
-}
-
-variable "trigger_type_http" {
-  type        = string
-  default     = "http"
-  description = "The HTTP trigger type for the Cloud Function"
-}
-
-variable "trigger_event_type_pubsub" {
-  type        = string
-  default     = "google.pubsub.topic.publish"
-  description = "The event type for Pub/Sub trigger"
-}
-
-variable "trigger_event_type_bucket" {
-  type        = string
-  default     = "google.storage.object.finalize"
-  description = "The event type for Cloud Storage trigger"
-}
-
-variable "pubsub_topic_name" {
-  type        = string
-  description = "The name of the Pub/Sub topic to use for the event trigger"
 }
 
 variable "runtime" {
+  description = "Runtime of the Cloud Function"
   type        = string
-  description = "The runtime of the Cloud Function"
 }
 
 variable "available_memory_mb" {
+  description = "Memory allocated to the Cloud Function in MB"
   type        = number
-  default     = 256
-  description = "The amount of memory available to the Cloud Function, in megabytes"
 }
 
 variable "timeout" {
+  description = "Timeout for the Cloud Function in seconds"
   type        = number
-  default     = 60
-  description = "The amount of time the Cloud Function has to complete, in seconds"
 }
 
+# Cloud Function archive bucket
 variable "function_archive_bucket_name" {
+  description = "Name of the Google Cloud Storage bucket containing the function archive"
   type        = string
-  description = "The name of the Google Cloud Storage bucket to use for the Cloud Function archive"
 }
 
+
+# Cloud Function entry point
 variable "entry_point" {
+  description = "Name of the function to be executed in the Cloud Function"
   type        = string
-  default     = "handler"
-  description = "The entry point for the Cloud Function"
+  default     = ""
 }
 
+# Environment variables
 variable "environment_vars" {
+  description = "Environment variables for the Cloud Function"
   type        = map(string)
   default     = {}
-  description = "The environment variables to set for the Cloud Function"
 }
 
 variable "ingress_settings" {
+  description = "Ingress settings for the cloud function"
   type        = string
-  default     = "ALLOW_ALL"
-  description = "The ingress settings for the function. Allowed values are ALLOW_ALL, ALLOW_INTERNAL_AND_GCLB and ALLOW_INTERNAL_ONLY. Changes to this field will recreate the cloud function."
 }
 
-
+# Service account email
 variable "service_account_email" {
+  description = "Service account email for the Cloud Function"
   type        = string
-  default     = null
-  description = "The email address of the service account to associate with the Cloud Function"
 }
 
+# VPC connector egress settings
 variable "vpc_connector_egress_settings" {
+  description = "Egress settings for the VPC connector"
   type        = string
-  default     = null
-  description = "The VPC connector egress settings for the Cloud Function"
 }
 
+# VPC connector
 variable "vpc_connector" {
+  description = "VPC connector for the Cloud Function"
   type        = string
-  default     = null
-  description = "The name of the VPC connector to use for the Cloud Function"
 }
 
+# Maximum number of instances
 variable "max_instances" {
+  description = "Maximum number of instances for the Cloud Function"
   type        = number
+}
+
+# Build environment variables
+variable "build_env_vars" {
+  description = "Build environment variables for the Cloud Function"
+  type        = map(string)
+  default     = {}
+}
+
+# Build worker pool
+variable "build_worker_pool" {
+  description = "Build worker pool for the Cloud Function"
+  type        = string
   default     = null
-  description = "The maximum number of instances of the Cloud Function to run"
 }
+
+# KMS key name for customer-managed encryption
+variable "kms_key_name" {
+  description = "KMS key name for customer-managed encryption"
+  type        = string
+  default     = null
+}
+
+# Image repository type
+variable "image_repository_type" {
+  description = "Image repository type for the Cloud Function"
+  type        = string
+}
+
+# Image repository
+variable "image_repository" {
+  description = "Image repository for the Cloud Function"
+  type        = string
+}
+
+# Trigger type
+variable "trigger_type" {
+  description = "Type of trigger for the Cloud Function"
+  type        = string
+}
+
+# HTTP trigger type constant
+variable "trigger_type_http" {
+  description = "Constant for the HTTP trigger type"
+  type        = string
+  default     = "HTTP_TRIGGER"
+}
+
+# Pub/Sub trigger type constant
+variable "trigger_type_pubsub" {
+  description = "Constant for the Pub/Sub trigger type"
+  type        = string
+  default     = "PUBSUB_TRIGGER"
+}
+
+# Cloud Storage trigger type constant
+variable "trigger_type_bucket" {
+  description = "Type of Cloud Storage trigger for the Cloud Function"
+  type        = string
+  default     = "BUCKET_TRIGGER"
+}
+
+# Pub/Sub trigger event type
+variable "trigger_event_type_pubsub" {
+  description = "Event type for the Pub/Sub trigger"
+  type        = string
+  default     = "google.pubsub.topic.publish"
+}
+
+# Cloud Storage trigger event type
+variable "trigger_event_type_bucket" {
+  description = "Event type for the Cloud Storage trigger"
+  type        = string
+  default     = "google.storage.object.finalize"
+}
+
+# Trigger event resource
 variable "trigger_event_resource" {
+  description = "Resource for the event trigger"
   type        = string
-  description = "The resource to use for the Cloud Function event trigger"
+  default     = null
 }
+
+# Pub/Sub topic name for the event trigger
+variable "pubsub_topic_name" {
+  description = "Name of the Pub/Sub topic for the event trigger"
+  type        = string
+  default     = null
+}
+
+# Encryption type for the Cloud Function
+variable "encryption_type" {
+  description = "Encryption type for the Cloud Function"
+  type        = string
+  default     = "GOOGLE_MANAGED_KEY"
+}
+
+# Customer-managed encryption key type constant
+variable "CUSTOMER_MANAGED_KEY" {
+  description = "Constant for the customer-managed encryption key type"
+  type        = string
+  default     = "CUSTOMER_MANAGED_KEY"
+}
+
+# GitHub repository URL for Cloud Function deployment
+variable "github_url" {
+  description = "URL of the GitHub repository to deploy the Cloud Function from"
+  type        = string
+}
+
+# Local folder name for cloning the GitHub repository
 variable "folder_name" {
+  description = "Name of the local folder to clone the repository to"
   type        = string
-  description = "The folder name in the cloud storage"
 }
+
+# Archive name for the local folder
 variable "zip_name" {
+  description = "Name of the archive to create from the local folder"
   type        = string
-  description = "The zip file name to zip"
+}
+variable "created_by" {
+  description = "The name of the person or team that created the resource"
+  type        = string
+}
+
+variable "description" {
+  description = "A description of the resource"
+  type        = string
+}
+
+variable "owner" {
+  description = "The name of the person or team that owns the resource"
+  type        = string
+}
+variable "project_id" {
+  description = "The ID of the Google Cloud project"
+  type        = string
 }

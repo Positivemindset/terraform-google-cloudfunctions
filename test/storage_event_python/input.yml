@@ -1,0 +1,11 @@
+attributes:
+  project_id: "my-project"
+  function_name: "my-function"
+  service_account_email: "my-service-account@example.com"
+  runtime: "python39"
+  trigger_type_http: "HTTP_TRIGGER"
+  trigger_type_pubsub: "PUBSUB_TRIGGER"
+  trigger_type_bucket: "CLOUD_STORAGE_TRIGGER"
+  pubsub_topic_name: "my-topic"
+  trigger_event_type_bucket: "google.storage.object.finalize"
+  trigger_event_resource: "my-bucket"
